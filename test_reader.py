@@ -1,26 +1,29 @@
-try:
-    import Image
-except ImportError:
-    from PIL import Image
-import pytesseract
+from pdfminer.pdfparser import PDFParser
+from pdfminer.pdfdocument import PDFDocument
+from pdfminer.pdfpage import PDFPage
+from pdfminer.pdfpage import PDFTextExtractionNotAllowed
+from pdfminer.pdfinterp import PDFResourceManager, PDFPageInterpreter
+from pdfminer.pdfdevice import PDFDevice
+from pdfminer.layout import LAParams
+from pdfminer.converter import PDFResourceManager, PDFPageAggregator
+from pdfminer.pdfpage import PDFPage
+from pdfminer.layout import LTTextBoxHorizontal
 
-# If you don't have tesseract executable in your PATH, include the following:
-# pytesseract.pytesseract.tesseract_cmd = r'<full_path_to_your_tesseract_executable>'
-# Example tesseract_cmd = r'C:\Program Files (x86)\Tesseract-OCR\tesseract'
+fp = open("DO_NOT_COMMIT_ME_THIS_HAS_IMPORTANT_INFO/bank_statement.pdf", 'rb')
+parser = PDFParser(fp)
 
-file_name = "test_record.png"
+document = PDFDocument(parser)
 
-# Simple image to string
-print(pytesseract.image_to_string(Image.open(file_name)))
-
-# French text image to string
-print(pytesseract.image_to_string(Image.open('test-european.jpg'), lang='fra'))
-
-# Get bounding box estimates
-print(pytesseract.image_to_boxes(Image.open(file_name)))
-
-# Get verbose data including boxes, confidences, line and page numbers
-print(pytesseract.image_to_data(Image.open(file_name)))
-
-# Get informations about orientation and script detection
-print(pytesseract.image_to_osd(Image.open(file_name)))
+# Create a PDF resource manager object that stores shared resources.
+rsrcmgr = PDFResourceManager()
+# Create a PDF device object.
+device = PDFPageAggregator(rsrcmgr, laparams=laparams)
+# Create a PDF interpreter object.
+interpreter = PDFPageInterpreter(rsrcmgr, device)
+# Process each page contained in the document.
+for page in PDFPage.create_pages(document):
+    interpreter.process_page(page)
+    layout = device.get_result()
+    for element in layout:
+        if instanceof(element, LTTextBoxHorizontal):
+            print(element.get_text())
