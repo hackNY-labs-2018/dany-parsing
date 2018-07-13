@@ -4,10 +4,10 @@ import csv
 
 def parse_tesseract(contents):
     """
-    TODO: Fill this out.
-    Description:
-    Input Type:
-    Output Type:
+    Takes in the results of pytesseract image_to_boxes and returns a list of transactions
+    in a csv format (string)
+    Input Type: array from pytesseracts image_to_boxes function
+    Output Type: string that is csv compliant
     """
     all_lines = determine_information_lines(contents)
     fieldnames = ['description', 'total', 'location']
@@ -27,10 +27,12 @@ def parse_tesseract(contents):
 
 def determine_information_lines(contents):
     """
-    TODO: Fill this out.
-    Description:
-    Input Type:
-    Output Type:
+    Gets any lines of content that exists in the document. The goal is to then process
+    these lines and retreive the transaction ones. The principle is that transaction
+    details are linear and therefore by breaking the parsed content by pytesseract
+    into line objects, we know any transaction will be in its own line.
+    Input Type: array from pytesseracts image_to_boxes function
+    Output Type: array containing lists of strings
     """
     # Beware, this current implementation is fairly costly with O(N^2)
     lines = []
@@ -53,10 +55,11 @@ def determine_information_lines(contents):
 # better
 def is_close_enough(x1, y1, x2, y2):
     """
-    TODO: Fill this out.
-    Description:
-    Input Type:
-    Output Type:
+    Determines if the x,y coordinates of two lines puts them in the same line of
+    a document. The principle is that if the y-offset is small, they are on the
+    same line.
+    Input Type: floats of coordinates
+    Output Type: boolean
     """
     THRESHOLD = 4
     if abs(y1 - y2) < THRESHOLD:
