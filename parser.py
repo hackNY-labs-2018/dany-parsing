@@ -36,14 +36,43 @@ def data_from_raw_line(line):
     Input Type: array of data
     Output Type: json like object to be written
     """
+    raw_line = ''
+    raw_sections = []
+    last_x = 0
+    current_section = ''
+    for i in line:
+        if i['x'] - last_x > 20 and not current_section == '':
+            raw_sections += [current_section]
+            current_section = ''
+        last_x = i['x']
+        current_section += i['contents']
+        raw_line += i['contents']
+    raw_sections += current_section
+    '''
+    transaction_date = raw_line[0:5]
+    posting_date = raw_line[5:10]
+    description = raw_line[10]
+    location = raw_line[11]
+    reference_number = raw_line[12]
+    account_number = raw_line[13]
+    amount = raw_line[14]
+    '''
+    transaction_date = raw_sections[0]
+    posting_date = raw_sections[1]
+    description = raw_sections[2]
+    location = raw_sections[3]
+    reference_number = raw_sections[4]
+    account_number = raw_sections[5]
+    amount = raw_sections[6]
+
     formatted_line = {
-        'transaction_date': line[0]['contents'],
-        'posting_date': line[1]['contents'],
-        'description': line[2]['contents'],
-        'location': line[3]['contents'],
-        'reference_number': line[4]['contents'],
-        'account_number': line[5]['contents'],
-        'amount': line[6]['contents'],
+        'transaction_date': transaction_date,
+        'posting_date': posting_date,
+        'description': description,
+        'location': location,
+        'reference_number': reference_number,
+        'account_number': account_number,
+        'amount': amount
     }
     return formatted_line
 
