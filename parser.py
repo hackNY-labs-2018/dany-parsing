@@ -1,6 +1,9 @@
+"""Parser looks at statement transactions and puts out a csv of transactions.
+"""
+from operator import attrgetter
+import csv
 from operator import attrgetter
 import io
-import csv
 DEBUG = True
 
 
@@ -108,7 +111,7 @@ def determine_information_lines(contents):
 # It's so simple it works, but a more intelligent threshold construction that
 # adapts to the statistical line distribution in any given document would be
 # better
-def is_close_enough(x1, y1, x2, y2):
+def is_close_enough(x_1, y_1, x_2, y_2):
     """
     Determines if the x,y coordinates of two lines puts them in the same line of
     a document. The principle is that if the y-offset is small, they are on the
@@ -116,7 +119,7 @@ def is_close_enough(x1, y1, x2, y2):
     Input Type: floats of coordinates
     Output Type: boolean
     """
-    THRESHOLD = 4
-    if abs(y1 - y2) < THRESHOLD:
+    threshold = 4
+    if abs(y_1 - y_2) < threshold:
         return True
     return False

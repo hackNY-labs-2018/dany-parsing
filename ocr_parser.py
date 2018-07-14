@@ -1,17 +1,17 @@
-##############################
-# This file is the main point
-# of entry for OCR parsing
-##############################
+"""This file is the main point
+of entry for OCR parsing
+"""
 
 # Built-in modules
 import sys
 import base64
 
+# Custom Modules
+import parser
+
 # 3rd Party Modules
 from wand.image import Image as WandImage
 
-# Custom Modules
-import parser
 
 def parse_image(image):
     """
@@ -22,7 +22,8 @@ def parse_image(image):
     contents = pytesseract.image_to_boxes(image)
     print(contents)
     structured = []
-    contents = contents.split('\n') # Pytesseract output is a big string so we have to break and parse out
+    # Pytesseract output is a big string so we have to break and parse out
+    contents = contents.split('\n')
     for i in contents:
         data = i.split(' ') # More parsing out
         structured += [{
@@ -42,21 +43,26 @@ if __name__ == '__main__':
         from PIL import Image
     import pytesseract
 
-    file_name = None
+    FILE_NAME = None
     try:
-        file_name = sys.argv[1]
+        FILE_NAME = sys.argv[1]
     except:
         print('Sorry buddy, but you need to provide a filename.')
         sys.exit()
 
     image = None
-    if file_name[len(file_name)-4:len(file_name)] == '.pdf':
-        with WandImage(filename=file_name, resolution=300) as img:
-            with WandImage(blob=base64.b64decode(img), width=img.width, height=img.height, format='png') as bg:
+    if FILE_NAME[len(FILE_NAME)-4:len(FILE_NAME)] == '.pdf':
+        with WandImage(filename=FILE_NAME, resolution=300) as img:
+            with WandImage(
+                blob=base64.b64decode(img),
+                width=img.width,
+                height=img.height,
+                format='png'
+                ) as bg:
                 bg.composite(img, 0, 0)
                 image = bg
     else:
         # Otherwise we assume it's an actual image file
-        image = Image.open(file_name)
+        image = Image.open(FILE_NAME)
     parse_image(image)
     print('Done. Cheers!')
