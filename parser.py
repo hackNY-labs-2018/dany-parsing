@@ -40,8 +40,12 @@ def data_from_raw_line(line):
     raw_sections = []
     last_x = 0
     current_section = ''
+    count = 0
     for i in line:
-        if i['x'] - last_x > 20 and not current_section == '':
+        threshold = 30
+        if count == 2: # Description and place are very close together
+            threshold = 20
+        if i['x'] - last_x > threshold and not current_section == '':
             raw_sections += [current_section]
             current_section = ''
         last_x = i['x']
@@ -63,7 +67,11 @@ def data_from_raw_line(line):
     location = raw_sections[3]
     reference_number = raw_sections[4]
     account_number = raw_sections[5]
-    amount = raw_sections[6]
+    amount = ''
+    for i in raw_sections[6:]:
+        amount += i
+    if not amount[len(amount)-3] == '.':
+        amount = amount[:len(amount)-3] + '.' + amount[len(amount)-2:]
 
     formatted_line = {
         'transaction_date': transaction_date,
