@@ -43,11 +43,22 @@ def data_from_raw_line(line):
     raw_sections = []
     last_x = 0
     current_section = ''
+    count = 0
     for i in line:
-        if i['x'] - last_x > 20 and not current_section == '':
+        threshold = 40
+        if count == 2: # Description and place are very close together
+            threshold = 10
+        if count >= 4: # now we just have numbers so increase threshold
+            threshold = 40
+        delta = i['x'] - last_x
+        if delta > threshold and not current_section == '':
+            raw_line += '  ' # make larger differentiator
             raw_sections += [current_section]
             current_section = ''
         last_x = i['x']
+        if delta <= threshold and delta > threshold/2: # Likely a space
+            current_section += ' '
+            raw_line += ' '
         current_section += i['contents']
         raw_line += i['contents']
     raw_sections += current_section
@@ -66,7 +77,20 @@ def data_from_raw_line(line):
     location = raw_sections[3]
     reference_number = raw_sections[4]
     account_number = raw_sections[5]
-    amount = raw_sections[6]
+    amount_start = 6
+    try:
+        float(location) # If this succeeds the location is accidentally in the description
+        account_number = reference_number
+        reference_number = location
+        location = ''
+        amount_start = 5
+    except:
+        pass
+    amount = ''
+    for i in raw_sections[amount_start:]: # Conglomerate every remaining value
+        amount += i
+    if not amount[len(amount)-3] == '.':
+        amount = amount[:len(amount)-3] + '.' + amount[len(amount)-2:]
 
     formatted_line = {
         'transaction_date': transaction_date,
@@ -77,7 +101,17 @@ def data_from_raw_line(line):
         'account_number': account_number,
         'amount': amount
     }
-    return formatted_line
+    if is_line_accurate(formatted_line):
+        return formatted_line
+    else:
+        return {'description': raw_line} # Provide the info but not nicely put together
+
+def is_line_accurate(formatted_line):
+    try:
+        int(formatted_line['transaction_date'][:2]) # Date should always begin with two numerals
+        return True
+    except:
+        return False
 
 
 def determine_information_lines(contents):
