@@ -18,10 +18,7 @@ def parse_tesseract(ocr_list):
     for i in ocr_list:
         lines_to_add = determine_information_lines(i)
         all_lines += determine_information_lines(i)
-    fieldnames = ['transaction_date', 'posting_date', 'description', 'location', 'reference_number', 'account_number', 'amount']
-    csv_string = io.StringIO()
-    writer = csv.DictWriter(csv_string, fieldnames=fieldnames)
-    writer.writeheader()
+    json_data = []
     for i in all_lines:
         text = i['contents']
         try:
@@ -34,9 +31,22 @@ def parse_tesseract(ocr_list):
                 int(line_to_write('description'))
                 transaction_line = True
             if transaction_line:
-                writer.writerow(line_to_write)
-        except:
-            print('You should look into why this failed and remove this print statement eventually')
+                json_data += [line_to_write]
+        except Exception as e:
+            print('Text:', text)
+            print('Exception:', e)
+            print('Standard exception but you might want to checkout why it failed and remove this print statement eventually')
+    print('Generating CSV')
+    raw_csv = data_to_csv(json_data)
+    return raw_csv
+
+def data_to_csv(data):
+    fieldnames = ['transaction_date', 'posting_date', 'description', 'location', 'reference_number', 'account_number', 'amount']
+    csv_string = io.StringIO()
+    writer = csv.DictWriter(csv_string, fieldnames=fieldnames)
+    writer.writeheader()
+    for line_to_write in data:
+        writer.writerow(line_to_write)
     raw_csv = csv_string.getvalue()
     csv_string.close()
     return raw_csv
@@ -53,21 +63,25 @@ def data_from_raw_line(line):
     last_x = 0
     current_section = ''
     count = 0
+    x_span = line[len(line)-1]['x'] - line[0]['x']
+    multiplier = x_span / 1105.0 # This is the x_span the algorithm was trained on
+    print('X Span:', x_span)
     for i in line:
         if i['contents'] == '‘': # Common Tesseract misinterpretation
             i['contents'] = 'I'
-        threshold = 40
+        threshold = 40 * multiplier
         if count == 2: # Description and place are very close together
-            threshold = 10
+            threshold = 10 * multiplier
         if count >= 4: # now we just have numbers so increase threshold
-            threshold = 40
+            threshold = 40 * multiplier
         delta = i['x'] - last_x
         if delta > threshold and not current_section == '':
             raw_line += '  ' # make larger differentiator
             raw_sections += [current_section]
             current_section = ''
         last_x = i['x']
-        if delta <= threshold and delta > threshold/2: # Likely a space
+        space_size = 15 * multiplier # Decided through raw testing
+        if delta <= threshold and delta > space_size: # Likely a space
             current_section += ' '
             raw_line += ' '
         current_section += i['contents']

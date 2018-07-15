@@ -42,18 +42,10 @@ def parse_images(images):
     parsed = parser.parse_tesseract(contents)
     return parsed
 
-
-if __name__ == '__main__':
-    FILE_NAME = None
-    try:
-        FILE_NAME = sys.argv[1]
-    except:
-        print('Sorry buddy, but you need to provide a filename.')
-        sys.exit()
-
+def parse(file_name):
     pil_pages = []
-    if FILE_NAME[len(FILE_NAME)-4:len(FILE_NAME)] == '.pdf':
-        with WandImage(filename=FILE_NAME, resolution=300) as pdf:
+    if file_name[len(file_name)-4:len(file_name)] == '.pdf':
+        with WandImage(filename=file_name, resolution=300) as pdf:
             for page_count, page in enumerate(pdf.sequence):
                 page_image = WandImage(image=page)
                 page_image.save(filename="reserved_name.png")
@@ -61,8 +53,18 @@ if __name__ == '__main__':
                 os.remove("reserved_name.png")
     else:
         # Otherwise we assume it's an actual image file
-        pil_pages = [Image.open(FILE_NAME)]
+        pil_pages = [Image.open(file_name)]
     
     csv_data = parse_images(pil_pages)
     print(csv_data)
     print('Done. Cheers!')
+    return csv_data
+
+if __name__ == '__main__':
+    file_name = None
+    try:
+        file_name = sys.argv[1]
+    except:
+        print('Sorry buddy, but you need to provide a filename.')
+        sys.exit()
+    parse(file_name)
