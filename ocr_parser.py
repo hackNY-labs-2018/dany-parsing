@@ -49,22 +49,19 @@ if __name__ == '__main__':
         print('Sorry buddy, but you need to provide a filename.')
         sys.exit()
 
-    image = None
+    pil_pages = []
     if FILE_NAME[len(FILE_NAME)-4:len(FILE_NAME)] == '.pdf':
         with WandImage(filename=FILE_NAME, resolution=300) as pdf:
-            pil_pages = []
             for page_count, page in enumerate(pdf.sequence):
                 page_image = WandImage(image=page)
                 page_image.save(filename="reserved_name.png")
                 pil_pages.append(Image.open("reserved_name.png"))
                 print(pil_pages)
                 os.remove("reserved_name.png")
-            for img_count, img in enumerate(pil_pages):
-                img.save("img" + str(img_count) + ".png","PNG")
-
-            
     else:
         # Otherwise we assume it's an actual image file
-        image = Image.open(FILE_NAME)
-    parse_image(image)
+        pil_pages = [Image.open(FILE_NAME)]
+    
+    for page in pil_pages: 
+        parse_image(page)
     print('Done. Cheers!')
