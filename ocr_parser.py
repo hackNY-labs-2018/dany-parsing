@@ -5,13 +5,16 @@ of entry for OCR parsing
 # Built-in modules
 import sys
 import base64
+import os
+from PIL import Image
 
 # Custom Modules
 import parser
+import pytesseract
 
 # 3rd Party Modules
 from wand.image import Image as WandImage
-
+from wand.color import Color
 
 def parse_image(image):
     """
@@ -37,12 +40,6 @@ def parse_image(image):
 
 
 if __name__ == '__main__':
-    try:
-        import Image
-    except ImportError:
-        from PIL import Image
-    import pytesseract
-
     FILE_NAME = None
     try:
         FILE_NAME = sys.argv[1]
@@ -50,19 +47,19 @@ if __name__ == '__main__':
         print('Sorry buddy, but you need to provide a filename.')
         sys.exit()
 
-    image = None
+    pil_pages = []
     if FILE_NAME[len(FILE_NAME)-4:len(FILE_NAME)] == '.pdf':
-        with WandImage(filename=FILE_NAME, resolution=300) as img:
-            with WandImage(
-                blob=base64.b64decode(img),
-                width=img.width,
-                height=img.height,
-                format='png'
-                ) as bg:
-                bg.composite(img, 0, 0)
-                image = bg
+        with WandImage(filename=FILE_NAME, resolution=300) as pdf:
+            for page_count, page in enumerate(pdf.sequence):
+                page_image = WandImage(image=page)
+                page_image.save(filename="reserved_name.png")
+                pil_pages.append(Image.open("reserved_name.png"))
+                print(pil_pages)
+                os.remove("reserved_name.png")
     else:
         # Otherwise we assume it's an actual image file
-        image = Image.open(FILE_NAME)
-    parse_image(image)
+        pil_pages = [Image.open(FILE_NAME)]
+    
+    for page in pil_pages: 
+        parse_image(page)
     print('Done. Cheers!')
