@@ -7,14 +7,17 @@ import io
 DEBUG = True
 
 
-def parse_tesseract(contents):
+def parse_tesseract(ocr_list):
     """
     Takes in the results of pytesseract image_to_boxes and returns a list of transactions
     in a csv format (string)
     Input Type: array from pytesseracts image_to_boxes function
     Output Type: string that is csv compliant
     """
-    all_lines = determine_information_lines(contents)
+    all_lines = []
+    for i in ocr_list:
+        lines_to_add = determine_information_lines(i)
+        all_lines += determine_information_lines(i)
     fieldnames = ['transaction_date', 'posting_date', 'description', 'location', 'reference_number', 'account_number', 'amount']
     csv_string = io.StringIO()
     writer = csv.DictWriter(csv_string, fieldnames=fieldnames)
@@ -23,7 +26,15 @@ def parse_tesseract(contents):
         text = i['contents']
         try:
             line_to_write = data_from_raw_line(text)
-            writer.writerow(line_to_write)
+            transaction_line = False
+            try:
+                line_to_write['transaction_date']
+                transaction_line = True
+            except:
+                int(line_to_write('description'))
+                transaction_line = True
+            if transaction_line:
+                writer.writerow(line_to_write)
         except:
             print('You should look into why this failed and remove this print statement eventually')
     raw_csv = csv_string.getvalue()

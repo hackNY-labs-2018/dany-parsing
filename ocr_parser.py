@@ -16,26 +16,30 @@ import pytesseract
 from wand.image import Image as WandImage
 from wand.color import Color
 
-def parse_image(image):
+def parse_images(images):
     """
-    Takes in a Python Image object and returns all bank data
-    Input Type: Python Image object
+    Takes in a list of Python Image objects and returns all bank data
+    Input Type: list of Python Image objects
     Output Type: string that is csv compliant
     """
-    contents = pytesseract.image_to_boxes(image)
-    print(contents)
-    structured = []
-    # Pytesseract output is a big string so we have to break and parse out
-    contents = contents.split('\n')
-    for i in contents:
-        data = i.split(' ') # More parsing out
-        structured += [{
-            'contents': data[0],
-            'x': int(data[1]),
-            'y': int(data[2])
-        }]
-    parsed = parser.parse_tesseract(structured)
-    print(parsed)
+    contents = []
+    count = 1
+    for i in images:
+        print('Running OCR on image {0}'.format(count))
+        content = pytesseract.image_to_boxes(i)
+        content = content.split('\n')
+        structured = []
+        # Pytesseract output is a big string so we have to break and parse out
+        for i in content:
+            data = i.split(' ') # More parsing out
+            structured += [{
+                'contents': data[0],
+                'x': int(data[1]),
+                'y': int(data[2])
+            }]
+        contents += [structured]
+        count += 1
+    parsed = parser.parse_tesseract(contents)
     return parsed
 
 
@@ -54,12 +58,11 @@ if __name__ == '__main__':
                 page_image = WandImage(image=page)
                 page_image.save(filename="reserved_name.png")
                 pil_pages.append(Image.open("reserved_name.png"))
-                print(pil_pages)
                 os.remove("reserved_name.png")
     else:
         # Otherwise we assume it's an actual image file
         pil_pages = [Image.open(FILE_NAME)]
     
-    for page in pil_pages: 
-        parse_image(page)
+    csv_data = parse_images(pil_pages)
+    print(csv_data)
     print('Done. Cheers!')
