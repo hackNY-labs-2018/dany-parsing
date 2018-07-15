@@ -5,6 +5,7 @@ of entry for OCR parsing
 # Built-in modules
 import sys
 import base64
+import os
 from PIL import Image
 
 # Custom Modules
@@ -51,24 +52,15 @@ if __name__ == '__main__':
     image = None
     if FILE_NAME[len(FILE_NAME)-4:len(FILE_NAME)] == '.pdf':
         with WandImage(filename=FILE_NAME, resolution=300) as pdf:
-            test = WandImage(width=2550, height=19800, background=Color('alpha'))
-            page_index = 0
-            SINGLE_PAGE_HEIGHT = pdf.height
-            WIDTH = pdf.width
-            NUMBER_OF_PAGES = len(pdf.sequence)
-            DESIRED_HEIGHT = NUMBER_OF_PAGES * SINGLE_PAGE_HEIGHT
-            print(WIDTH)
-            print(DESIRED_HEIGHT)
-            print(test)
-            result = WandImage(width=WIDTH, height=DESIRED_HEIGHT, background=Color('white'))
-            print(result)
+            pil_pages = []
             for page_count, page in enumerate(pdf.sequence):
                 page_image = WandImage(image=page)
-                print(page_image)
-                result.composite(page_image, 0, page_count * result.height)
-                print(result)
-            result = WandImage(image = result)
-            result.save(filename="Result.png")
+                page_image.save(filename="reserved_name.png")
+                pil_pages.append(Image.open("reserved_name.png"))
+                print(pil_pages)
+                os.remove("reserved_name.png")
+            for img_count, img in enumerate(pil_pages):
+                img.save("img" + str(img_count) + ".png","PNG")
 
             
     else:
