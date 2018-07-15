@@ -5,6 +5,7 @@ of entry for OCR parsing
 # Built-in modules
 import sys
 import base64
+from PIL import Image
 
 # Custom Modules
 import parser
@@ -37,10 +38,6 @@ def parse_image(image):
 
 
 if __name__ == '__main__':
-    try:
-        import Image
-    except ImportError:
-        from PIL import Image
     import pytesseract
 
     FILE_NAME = None
@@ -52,15 +49,17 @@ if __name__ == '__main__':
 
     image = None
     if FILE_NAME[len(FILE_NAME)-4:len(FILE_NAME)] == '.pdf':
-        with WandImage(filename=FILE_NAME, resolution=300) as img:
-            with WandImage(
-                blob=base64.b64decode(img),
-                width=img.width,
-                height=img.height,
-                format='png'
-                ) as bg:
-                bg.composite(img, 0, 0)
-                image = bg
+        with WandImage(filename=FILE_NAME, resolution=300) as pdf:
+            page_index = 0
+            height = pdf.height
+            with WandImage(width=pdf.width,
+                height=len(pdf.sequence)*height) as png:
+                for page in pdf.sequence:
+                    png.composite(page, 0, page_index * height)
+                    page_index += 1
+                png.save(filename="xxx.png")
+                image = Image.open("xxx.png")
+            
     else:
         # Otherwise we assume it's an actual image file
         image = Image.open(FILE_NAME)
