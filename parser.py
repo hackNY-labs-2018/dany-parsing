@@ -20,8 +20,6 @@ def parse_tesseract(contents):
     writer = csv.DictWriter(csv_string, fieldnames=fieldnames)
     writer.writeheader()
     for i in all_lines:
-        # Warning: This step is just a proof of concept and doesn't deliver the
-        # right information
         text = i['contents']
         try:
             line_to_write = data_from_raw_line(text)
@@ -45,6 +43,8 @@ def data_from_raw_line(line):
     current_section = ''
     count = 0
     for i in line:
+        if i['contents'] == '‘': # Common Tesseract misinterpretation
+            i['contents'] = 'I'
         threshold = 40
         if count == 2: # Description and place are very close together
             threshold = 10
