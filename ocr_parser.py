@@ -9,9 +9,11 @@ from PIL import Image
 
 # Custom Modules
 import parser
+import pytesseract
 
 # 3rd Party Modules
 from wand.image import Image as WandImage
+from wand.color import Color
 
 
 def parse_image(image):
@@ -38,7 +40,6 @@ def parse_image(image):
 
 
 if __name__ == '__main__':
-    import pytesseract
 
     FILE_NAME = None
     try:
@@ -50,15 +51,25 @@ if __name__ == '__main__':
     image = None
     if FILE_NAME[len(FILE_NAME)-4:len(FILE_NAME)] == '.pdf':
         with WandImage(filename=FILE_NAME, resolution=300) as pdf:
+            test = WandImage(width=2550, height=19800, background=Color('alpha'))
             page_index = 0
-            height = pdf.height
-            with WandImage(width=pdf.width,
-                height=len(pdf.sequence)*height) as png:
-                for page in pdf.sequence:
-                    png.composite(page, 0, page_index * height)
-                    page_index += 1
-                png.save(filename="xxx.png")
-                image = Image.open("xxx.png")
+            SINGLE_PAGE_HEIGHT = pdf.height
+            WIDTH = pdf.width
+            NUMBER_OF_PAGES = len(pdf.sequence)
+            DESIRED_HEIGHT = NUMBER_OF_PAGES * SINGLE_PAGE_HEIGHT
+            print(WIDTH)
+            print(DESIRED_HEIGHT)
+            print(test)
+            result = WandImage(width=WIDTH, height=DESIRED_HEIGHT, background=Color('white'))
+            print(result)
+            for page_count, page in enumerate(pdf.sequence):
+                page_image = WandImage(image=page)
+                print(page_image)
+                result.composite(page_image, 0, page_count * result.height)
+                print(result)
+            result = WandImage(image = result)
+            result.save(filename="Result.png")
+
             
     else:
         # Otherwise we assume it's an actual image file
