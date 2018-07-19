@@ -3,6 +3,7 @@ isort==4.3.4
 lazy-object-proxy==1.3.1
 mccabe==0.6.1
 Pillow==5.1.0
+pdfquery==0.4.3
 pylint==1.9.2
 pytesseract==0.2.2
 six==1.11.0
