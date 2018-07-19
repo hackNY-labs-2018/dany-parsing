@@ -12,6 +12,7 @@ def extract_transactions(pdf):
             LTTextLineHorizontal:contains("Purchases and Adjustments")' % page)
         if purchases_header.attr('x0') is None or purchases_header.attr('y0') is None:
             continue
+        print(purchases_header)
         x = float(purchases_header.attr('x0'))
         y = float(purchases_header.attr('y0'))
 
@@ -33,7 +34,7 @@ def extract_transactions(pdf):
 
 def text_parse(filename):
     # TODO: validate PDF file?
-    pdf = pdfquery.PDFQuery(filename)
+    pdf = pdfquery.PDFQuery(filename, normalize_spaces=False)
     pdf.load()
     return extract_transactions(pdf)
 
