@@ -31,8 +31,6 @@ def extract_transactions(pdf):
                 ])['transactions']
     return '\n'.join(transactions)
 
-print(extract_transactions())
-
 def text_parse(filename):
     # TODO: validate PDF file?
     pdf = pdfquery.PDFQuery(filename)
