@@ -41,7 +41,9 @@ def extract_transactions(pdf):
 def process_text_cell(cell):
     """Helper function to process each text cell extracted from a pdf
     """
+    # regex that looks for multiple contiguous whitespace occurences (eg. multiple spaces)
     regex = r"\s\s+"
+    # replaces regex matches with comma delineation, also strips whitespace from both ends
     return re.sub(regex, ",", cell.text.strip())
 
 def text_parse(filename):
@@ -50,13 +52,16 @@ def text_parse(filename):
     if not filename.endswith('.pdf'):
         print('Sorry, only PDF files are supported.')
         return ""
+    # prevent space normalization in order to separate different text blocks in each line
     pdf = pdfquery.PDFQuery(filename, normalize_spaces=False)
     pdf.load()
     return extract_transactions(pdf)
 
 if __name__ == '__main__':
+    # ensure filename is provided
     if len(sys.argv) != 2:
         print("Need exactly one argument for filename.")
         sys.exit()
     FILENAME = sys.argv[1]
+    # execute and print result
     print(text_parse(FILENAME))
