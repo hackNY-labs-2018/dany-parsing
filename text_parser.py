@@ -1,7 +1,14 @@
+"""Text Parser parses text directly from a PDF using the "pdfquery" library
+"""
+
+import re
 import sys
+
 import pdfquery
 
 def extract_transactions(pdf):
+    """Extracts a list of all transactions in CSV format from a PDF
+    """
     pages_in_pdf = len(pdf.pq('LTPage'))
     line_height = 9.84 # TODO: how to find this apart from hardcoding?
     transactions = []
@@ -21,7 +28,7 @@ def extract_transactions(pdf):
              (x - 100, y - line_height, x + 500, y))
             ])['transactions']
         while len(t) == 6:
-            t = ','.join([cell.text.strip() for cell in t])
+            t = ','.join([process_text_cell(cell) for cell in t])
             transactions.append(t)
             y -= line_height
             t = pdf.extract([
@@ -31,7 +38,15 @@ def extract_transactions(pdf):
                 ])['transactions']
     return '\n'.join(transactions)
 
+def process_text_cell(cell):
+    """Helper function to process each text cell extracted from a pdf
+    """
+    regex = r"\s\s+"
+    return re.sub(regex, ",", cell.text.strip())
+
 def text_parse(filename):
+    """Parses text from a pdf
+    """
     if not filename.endswith('.pdf'):
         print('Sorry, only PDF files are supported.')
         return ""
@@ -40,9 +55,8 @@ def text_parse(filename):
     return extract_transactions(pdf)
 
 if __name__ == '__main__':
-    FILENAME = None
-    try:
-        FILENAME = sys.argv[1]
-        print(text_parse(FILENAME))
-    except:
-        print('This is not a valid filename.')
+    if len(sys.argv) != 2:
+        print("Need exactly one argument for filename.")
+        sys.exit()
+    FILENAME = sys.argv[1]
+    print(text_parse(FILENAME))
