@@ -40,11 +40,9 @@ def text_parse(filename):
     return extract_transactions(pdf)
 
 if __name__ == '__main__':
-    filename = None
+    FILENAME = None
     try:
-        filename = sys.argv[1]
+        FILENAME = sys.argv[1]
+        print(text_parse(FILENAME))
     except:
-        print('Sorry buddy, but you need to provide a filename.')
-        sys.exit()
-
-print(text_parse(filename))
+        print('This is not a valid filename.')
