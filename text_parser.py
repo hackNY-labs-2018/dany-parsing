@@ -53,7 +53,10 @@ def text_parse(filename):
         print('Sorry, only PDF files are supported.')
         return ""
     # prevent space normalization in order to separate different text blocks in each line
-    pdf = pdfquery.PDFQuery(filename, normalize_spaces=False)
+    pdf = pdfquery.PDFQuery(
+        filename, 
+        normalize_spaces=False,
+        resort=False)
     pdf.load()
     return extract_transactions(pdf)
 
