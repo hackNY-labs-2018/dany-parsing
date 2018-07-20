@@ -1,6 +1,7 @@
 """Text Parser parses text directly from a PDF using the "pdfquery" library
 """
 
+import os
 import re
 import sys
 
@@ -54,7 +55,7 @@ def text_parse(filename):
         return ""
     # prevent space normalization in order to separate different text blocks in each line
     pdf = pdfquery.PDFQuery(
-        filename, 
+        filename,
         normalize_spaces=False,
         resort=False)
     pdf.load()
@@ -66,5 +67,12 @@ if __name__ == '__main__':
         print("Need exactly one argument for filename.")
         sys.exit()
     FILENAME = sys.argv[1]
-    # execute and print result
-    print(text_parse(FILENAME))
+    # execute
+    OUTPUT = text_parse(FILENAME)
+    print(OUTPUT)
+    print('Writing to csv...')
+    # write to csv
+    OUTPUT_FILENAME = os.path.splitext(FILENAME)[0] + '.csv'
+    with open(OUTPUT_FILENAME, 'w') as file:
+        file.write(OUTPUT)
+    print('Done, written to {0}'.format(OUTPUT_FILENAME))
