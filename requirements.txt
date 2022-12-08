@@ -11,7 +11,7 @@ wrapt==1.10.11
 Wand==0.4.4
 alabaster==0.7.11
 Babel==2.6.0
-certifi==2018.4.16
+certifi==2022.12.7
 chardet==3.0.4
 coverage==4.5.1
 docutils==0.14
@@ -31,7 +31,7 @@ pypi-publisher==0.0.4
 pytesseract==0.2.2
 alabaster==0.7.11
 Babel==2.6.0
-certifi==2018.4.16
+certifi==2022.12.7
 chardet==3.0.4
 coverage==4.5.1
 docutils==0.14
